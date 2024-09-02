@@ -6,8 +6,15 @@
 		"mac": "2.206"
 	},
 	"id": "capeling.song-search",
-	"name": "song-search",
+	"name": "Song Search",
 	"version": "v1.0.0",
 	"developer": "Capeling",
-	"description": ""
+	"description": "",
+	"incompatibilities": [
+		{
+			"id": "mat.song-preview",
+			"importance": "breaking",
+			"version": "*"
+		}
+	]
 }

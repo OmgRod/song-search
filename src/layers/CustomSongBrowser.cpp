@@ -50,31 +50,51 @@ bool CustomSongBrowser::setup() {
     return true;
 }
 
+void CustomSongBrowser::reloadDownloaded() {
+    m_downloadedSongs.clear();
+
+    CCArrayExt<SongInfoObject*> songs = MusicDownloadManager::sharedState()->getDownloadedSongs();
+
+    for(SongInfoObject* song : songs) {
+        auto searchValue = fmt::format("{} {}", song->m_songName, song->m_artistName);
+        m_downloadedSongs.push_back({ searchValue, song });
+    }
+
+    searchSongs();
+}
+
 void CustomSongBrowser::textChanged(CCTextInputNode* input) {
     searchSongs();
 }
 
 void CustomSongBrowser::searchSongs() {
-    if(m_downloadedSongs.empty())
-        return;
 
     std::vector<SongInfoObject*> songs = {};
 
-    auto search = util::string::toLowercase(m_textInput->getString());
+    if(m_downloadedSongs.empty()) {
+        if(m_noSongs) return;
+        auto winSize = CCDirector::get()->getWinSize();
+        m_noSongs = CCLabelBMFont::create("You have no songs installed :(", "bigFont.fnt");
+        m_noSongs->setPosition(winSize / 2);
+        m_noSongs->setScale(0.5f);
+        m_mainLayer->addChild(m_noSongs);
+    } else {
+        auto search = util::string::toLowercase(m_textInput->getString());
 
-    for(std::pair<std::string, SongInfoObject*> item : m_downloadedSongs) {
+        for(std::pair<std::string, SongInfoObject*> item : m_downloadedSongs) {
 
-        if(!search.empty()) {
-            auto lowerName = util::string::toLowercase(item.first);
-            if(lowerName.find(search) != std::string::npos) {
-                songs.push_back(item.second);
+            if(!search.empty()) {
+                auto lowerName = util::string::toLowercase(item.first);
+                if(lowerName.find(search) != std::string::npos) {
+                    songs.push_back(item.second);
+                } else {
+                    log::debug("Failed to find {} in {}", search, lowerName);
+                }
             } else {
-                log::debug("Failed to find {} in {}", search, lowerName);
+                songs.push_back(item.second);
             }
-        } else {
-            songs.push_back(item.second);
-        }
 
+        }
     }
 
     updateList(songs, true);
@@ -85,8 +105,9 @@ void CustomSongBrowser::updateList(std::vector<SongInfoObject*>& songs, bool goT
 
     m_scrollLayer->m_contentLayer->removeAllChildren();
     m_cells.clear();
-    if(songs.empty())
+    if(songs.empty()) {
         return;
+    }
 
     for(SongInfoObject* item : songs) {
         auto cell = SimpleSongCell::create(item);

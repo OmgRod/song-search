@@ -9,6 +9,7 @@ protected:
     std::vector<cocos2d::CCNode*> m_cells = {};
     geode::ScrollLayer* m_scrollLayer = nullptr;
     CustomSongLayer* m_songLayer = nullptr;
+    cocos2d::CCLabelBMFont* m_noSongs = nullptr;
 
     bool setup();
     virtual void textChanged(CCTextInputNode* input);
@@ -20,4 +21,5 @@ public:
     CustomSongLayer* getSongLayer();
     void updateAllCellPlaybacks();
     void searchSongs();
+    void reloadDownloaded();
 };

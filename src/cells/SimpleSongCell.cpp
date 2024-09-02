@@ -28,7 +28,18 @@ bool SimpleSongCell::init(SongInfoObject* song) {
     addChild(m_buttonMenu);
 
     m_playbackBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_playMusicBtn_001.png"), this, menu_selector(SimpleSongCell::onPlay));
-    m_selectSongBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_selectSongBtn_001.png"), this, menu_selector(SimpleSongCell::onUse));
+    m_selectSongBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_selectSongBtn_001.png"), this, menu_selector(SimpleSongCell::onSelect));
+
+    auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_deleteSongBtn_001.png");
+    deleteSpr->setScale(0.5f);
+    m_deleteBtn = CCMenuItemSpriteExtra::create(deleteSpr, this, menu_selector(SimpleSongCell::onDelete));
+    m_deleteBtn->setPosition(m_bgSprite->getContentSize().width / 2.f + 12.f, 15.5f);
+    m_deleteBtn->setVisible(false);
+
+    auto deleteMenu = CCMenu::create();
+    deleteMenu->addChild(m_deleteBtn);
+    deleteMenu->setPosition(0, 0);
+    addChild(deleteMenu);
 
     m_buttonMenu->addChild(m_playbackBtn);
     m_buttonMenu->addChild(m_selectSongBtn);
@@ -36,29 +47,36 @@ bool SimpleSongCell::init(SongInfoObject* song) {
     m_buttonMenu->setPosition({ this->getContentWidth() / 2.7f, 1 });
     m_buttonMenu->updateLayout();
 
-    m_deleteMenu = CCMenu::create();
-    m_deleteMenu->setPosition(this->getContentWidth() + 5.f, 1);
-    addChild(m_deleteMenu);
-
-    auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_deleteSongBtn_001.png");
-    deleteSpr->setScale(0.4f);
-    m_deleteBtn = CCMenuItemSpriteExtra::create(deleteSpr, this, menu_selector(CustomSongWidget::onDelete));
-    m_deleteMenu->addChild(m_deleteBtn);
+    scheduleUpdate();
 
     return true;
 }
 
 void SimpleSongCell::onPlay(CCObject* sender) {
-    //onPlayback(sender);
+    onPlayback(sender);
     m_browserLayer->updateAllCellPlaybacks();
 }
 
-void SimpleSongCell::onUse(CCObject* sender) {
+void SimpleSongCell::onDelete(CCObject* sender) {
+    createQuickPopup("Delete Song", "Are you sure you would like to <cr>delete</c> this song?", "No", "Yes", [this](auto, bool btn2) {
+        if(btn2) {
+            auto path = MusicDownloadManager::sharedState()->pathForSong(m_songInfoObject->m_songID);
+            remove(path.c_str());
+            auto widget = getChildOfType<CustomSongWidget>(m_browserLayer->getSongLayer()->m_mainLayer, 0);
+            widget->m_songInfoObject = this->m_songInfoObject;
+            widget->m_songInfoObject->retain();
+            widget->updateSongInfo();
+            m_browserLayer->reloadDownloaded();
+        }
+    });
+}
+
+void SimpleSongCell::onSelect(CCObject* sender) {
     auto widget = getChildOfType<CustomSongWidget>(m_browserLayer->getSongLayer()->m_mainLayer, 0);
     widget->m_songInfoObject = this->m_songInfoObject;
     widget->m_songInfoObject->retain();
     widget->getSongInfoIfUnloaded();
-    widget->onSelect(nullptr);
+    widget->onSelect(sender);
 }
 
 void SimpleSongCell::setBrowserLayer(CustomSongBrowser* browserLayer) {
@@ -77,4 +95,38 @@ SimpleSongCell* SimpleSongCell::create(SongInfoObject *song) {
     }
     delete ret;
     return nullptr;
+}
+
+void SimpleSongCell::onHover() {
+    m_deleteBtn->setVisible(true);
+}
+
+void SimpleSongCell::onHoverExit() {
+    m_deleteBtn->setVisible(false);
+}
+
+void SimpleSongCell::update(float delta) {
+
+    auto mousePos = getMousePos();
+
+    auto pos = getParent()->convertToWorldSpace(getPosition());
+    auto size = m_bgSprite->getContentSize();
+    auto scale = m_bgSprite->getScale();
+    auto anchorPoint = m_bgSprite->getAnchorPoint();
+
+    float anchorYSubtract = size.height * scale * anchorPoint.y;
+
+    CCRect rect = CCRect(0, pos.y - anchorYSubtract, size.width * scale, size.height * scale);
+
+    if(mousePos.y >= rect.getMinY() && mousePos.y <= rect.getMaxY()) {
+        if(!isHovering){
+            onHover();
+            isHovering = true;
+        }
+    } else {
+        if(isHovering){
+            onHoverExit();
+            isHovering = false;
+        }
+    }
 }
