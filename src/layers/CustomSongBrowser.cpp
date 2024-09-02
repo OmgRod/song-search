@@ -27,7 +27,7 @@ bool CustomSongBrowser::setup() {
 
     for(SongInfoObject* song : songs) {
         auto searchValue = fmt::format("{} {}", song->m_songName, song->m_artistName);
-        m_downloadedSongs.push_back({ searchValue, song });
+        m_downloadedSongs.emplace_back( searchValue, song );
     }
 
     m_closeBtn->setPosition(0, 0);
