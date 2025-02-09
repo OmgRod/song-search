@@ -1,4 +1,7 @@
+#include <Geode/Geode.hpp>
 #include "string.hpp"
+
+using namespace geode::prelude;
 
 namespace util::string {
     std::string toLowercase(const std::string_view str) {

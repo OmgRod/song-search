@@ -1,20 +1,19 @@
 {
-	"geode": "3.4.0",
+	"geode": "4.2.0",
 	"gd": {
-		"win": "2.206",
-		"android": "2.206",
-		"mac": "2.206"
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074"
 	},
 	"id": "capeling.song-search",
 	"name": "Song Search",
 	"version": "v1.0.0",
 	"developer": "Capeling",
 	"description": "",
-	"incompatibilities": [
-		{
-			"id": "mat.song-preview",
+	"incompatibilities": {
+		"mat.song-preview": {
 			"importance": "breaking",
 			"version": "*"
 		}
-	]
+	}
 }

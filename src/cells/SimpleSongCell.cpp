@@ -62,7 +62,7 @@ void SimpleSongCell::onDelete(CCObject* sender) {
         if(btn2) {
             auto path = MusicDownloadManager::sharedState()->pathForSong(m_songInfoObject->m_songID);
             remove(path.c_str());
-            auto widget = getChildOfType<CustomSongWidget>(m_browserLayer->getSongLayer()->m_mainLayer, 0);
+            auto widget = m_browserLayer->getSongLayer()->m_mainLayer->getChildByType<CustomSongWidget>(0);
             widget->m_songInfoObject = this->m_songInfoObject;
             widget->m_songInfoObject->retain();
             widget->updateSongInfo();
@@ -72,7 +72,7 @@ void SimpleSongCell::onDelete(CCObject* sender) {
 }
 
 void SimpleSongCell::onSelect(CCObject* sender) {
-    auto widget = getChildOfType<CustomSongWidget>(m_browserLayer->getSongLayer()->m_mainLayer, 0);
+    auto widget = m_browserLayer->getSongLayer()->m_mainLayer->getChildByType<CustomSongWidget>(0);
     widget->m_songInfoObject = this->m_songInfoObject;
     widget->m_songInfoObject->retain();
     widget->getSongInfoIfUnloaded();

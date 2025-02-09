@@ -140,7 +140,7 @@ CustomSongLayer* CustomSongBrowser::getSongLayer() {
 
 CustomSongBrowser* CustomSongBrowser::create() {
     auto ret = new CustomSongBrowser();
-    if(ret->init(0, 0)) {
+    if(ret->init()) {
         ret->autorelease();
         return ret;
     }
